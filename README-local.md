@@ -14,7 +14,7 @@
 > 2. [定时推送](example/pushmessage)
 
 
-## [服务端主动推送消息到指定的客户端](example/pushmessage_specify)
+## [服务端主动推送消息到指定的客户端](example/cronpushmessagetospecify)
 
 > 参考
 > 1. [自定义协议处理](example/protocol)
