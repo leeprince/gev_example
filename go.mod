@@ -10,9 +10,12 @@ require (
 	github.com/gobwas/httphead v0.0.0-20180130184737-2c6c146eadee
 	github.com/gobwas/pool v0.2.0
 	github.com/golang/protobuf v1.4.3
+	github.com/google/go-cmp v0.5.7 // indirect
+	github.com/kr/pretty v0.3.0 // indirect
 	github.com/libp2p/go-reuseport v0.0.1
 	github.com/panjf2000/gnet v1.4.0
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/spf13/cast v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/evio v1.0.2
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344
