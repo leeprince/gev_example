@@ -44,7 +44,8 @@ func main() {
 		// listen for reply
 		msg, err := UnPacket(conn)
 		if err != nil {
-			panic(err)
+			log.Println("UnPacket err", err.Error())
+			return
 		}
 		fmt.Printf("Message from server (len %d) : %s", len(msg), string(msg))
 	}

@@ -5,7 +5,6 @@ import (
 	"github.com/Allenxuxu/gev"
 	"github.com/Allenxuxu/ringbuffer"
 	"github.com/gobwas/pool/pbytes"
-	"github.com/spf13/cast"
 	"log"
 	"math/rand"
 	"sync"
@@ -18,7 +17,7 @@ type Server struct {
 	server *gev.Server
 }
 
-var clienConnList []connectData
+var clientConnList = make(map[string]connectData)
 
 type connectData struct {
 	conn *gev.Connection
@@ -88,23 +87,32 @@ func (s *Server) Stop() {
 func (s *Server) OnConnect(c *gev.Connection) {
 	log.Println(" OnConnect ： ", c.PeerAddr())
 
-	clienConnList = append(clienConnList, connectData{
+	// 加入全局连接管理器中
+	s.mu.Lock()
+	clientConnList[c.PeerAddr()] = connectData{
 		conn: c,
 		data: c.PeerAddr(),
-	})
+	}
+	s.mu.Unlock()
 
+	// 为每个连接启动一个协程，并定时（10秒内随机）发送消息
+	// 	- 每次发送消息前检查当前协程的局部变量（socket连接）是否再全局管理连接中，不在则结束当前协程（避免当前协程一直占用资源）
 	go func(c *gev.Connection) {
 		for {
-			randTime := cast.ToDuration(rand.Uint64()%10) + 1
+			randTime := int64(rand.Uint64() % 10)
 			log.Println("time.Sleep:", randTime)
-			time.Sleep(time.Second * randTime)
+			time.Sleep(time.Second * time.Duration(randTime))
 
+			if _, ok := clientConnList[c.PeerAddr()]; !ok {
+				log.Println(" clientConnList c.PeerAddr() connenct close")
+				return
+			}
 			err := c.Send([]byte(c.PeerAddr()))
 			if err != nil {
 				log.Println("c.Send err：", err.Error())
 				continue
 			}
-			log.Println("c.Send success")
+			log.Println("c.Send success:", clientConnList)
 		}
 	}(c)
 }
@@ -119,6 +127,13 @@ func (s *Server) OnMessage(c *gev.Connection, ctx interface{}, data []byte) (out
 // OnClose callback
 func (s *Server) OnClose(c *gev.Connection) {
 	log.Println("OnClose")
+
+	// 客户端主动关闭连接后，服务端应剔除该连接，否则会报错：connection closed
+	if _, ok := clientConnList[c.PeerAddr()]; ok {
+		s.mu.Lock()
+		delete(clientConnList, c.PeerAddr())
+		s.mu.Unlock()
+	}
 }
 
 func main() {
