@@ -46,7 +46,11 @@ func UnPacket(c net.Conn) ([]byte, error) {
 }
 
 func main() {
-	conn, e := net.Dial("tcp", "127.0.0.1:1834") // gev 本地
+	//conn, e := net.Dial("tcp", "10.20.16.49:30106") // gd 开发环境
+	conn, e := net.Dial("tcp", "10.20.16.49:30107") // gd 测试环境
+	//conn, e := net.Dial("tcp", "127.0.0.1:30100") // gd 本地
+
+	//conn, e := net.Dial("tcp", "127.0.0.1:1834") // gev 本地
 
 	if e != nil {
 		log.Fatal(e)
@@ -72,8 +76,8 @@ func main() {
 		fmt.Printf("输入的 cmd 并去除右边的换行符后的 cmd: %s; T:%T \n", cmd, cmd)
 
 		// 配置信息
-		token := "v5_Bn5igibyNY35CEU0lTSzlzNZLYjvytLV1164894496"
-		openEnterpriseId := "yOVMWGF0TfmRvkZtZaaLbKdBzBAKP4J8DtpdIZk67TA="
+		token := "v5_FlfITAGQlOeINlVK1euASi7e6eHmFP5U1154764563"
+		openEnterpriseId := "YpQHNOTfZ0KWvZZno1A2BOvojyShiQ3+7um3VkAxYUA="
 		// 配置信息 -end
 
 		var sendMsg common.SendMsg
