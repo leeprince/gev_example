@@ -17,6 +17,6 @@ require (
 	github.com/tidwall/evio v1.0.2
 	gitlab.yewifi.com/golden-cloud/common v0.8.42
 	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
-	golang.org/x/sys v0.0.0-20210315160823-c6e025ad8005
+	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec
 	google.golang.org/protobuf v1.25.0
 )

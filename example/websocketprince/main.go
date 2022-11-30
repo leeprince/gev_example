@@ -136,8 +136,9 @@ func loopBoardcast(serv *example) {
 				serv.Unlock()
 				continue
 			}
+			
 
-			msg, err := util.PackData(ws.MessageText, []byte("publish message"))
+			msg, err := util.PackData(ws.MessageText, []byte("{\"id\":1, \"message\":\"prince-test\"}"))
 			if err != nil {
 				serv.Unlock()
 				continue
@@ -146,7 +147,7 @@ func loopBoardcast(serv *example) {
 		}
 		serv.Unlock()
 
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(time.Second * 5)
 	}
 }
 

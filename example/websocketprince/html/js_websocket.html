@@ -44,7 +44,7 @@
             });
 
             if (window["WebSocket"]) {
-                conn = new WebSocket("ws://127.0.0.1:1833/?uid="+uid+"&to_uid="+to_uid);
+                conn = new WebSocket("ws://127.0.0.1:1833/");
                 conn.onclose = function(evt) {
                     appendLog($("<div><b>Connection Closed.</b></div>"))
                 }
