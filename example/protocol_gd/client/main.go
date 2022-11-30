@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/Allenxuxu/gev/example/protocol_gd/common"
+	"gitlab.yewifi.com/golden-cloud/common/gclog"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"log"
@@ -45,10 +46,19 @@ func UnPacket(c net.Conn) ([]byte, error) {
 	return contentByte, nil
 }
 
+func init() {
+	logger := gclog.Default(
+		"tools_test",
+		".",
+		5,
+		"",
+	)
+	gclog.SetDefaultLogger(logger)
+}
 func main() {
 	//conn, e := net.Dial("tcp", "10.20.16.49:30106") // gd 开发环境
-	conn, e := net.Dial("tcp", "10.20.16.49:30107") // gd 测试环境
-	//conn, e := net.Dial("tcp", "127.0.0.1:30100") // gd 本地
+	//conn, e := net.Dial("tcp", "10.20.16.49:30107") // gd 测试环境
+	conn, e := net.Dial("tcp", "127.0.0.1:18000") // gd 本地
 
 	//conn, e := net.Dial("tcp", "127.0.0.1:1834") // gev 本地
 
@@ -189,7 +199,7 @@ func main() {
 		// --- 发送数据 -end ++++++++++++++++++++++++++++++++++
 
 		// --- 监听TCP服务端响应
-		receveMessage(conn)
+		go receveMessage(conn)
 	}
 }
 

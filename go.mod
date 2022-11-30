@@ -11,17 +11,12 @@ require (
 	github.com/gobwas/pool v0.2.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.7 // indirect
-	github.com/kr/pretty v0.3.0 // indirect
 	github.com/libp2p/go-reuseport v0.0.1
 	github.com/panjf2000/gnet v1.4.0
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/spf13/cast v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/evio v1.0.2
-	golang.org/x/net v0.0.0-20200625001655-4c5254603344
-	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e
-	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114 // indirect
-	google.golang.org/protobuf v1.23.0
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
-	gopkg.in/yaml.v2 v2.3.0 // indirect
+	gitlab.yewifi.com/golden-cloud/common v0.8.42
+	golang.org/x/net v0.0.0-20210316092652-d523dce5a7f4
+	golang.org/x/sys v0.0.0-20210315160823-c6e025ad8005
+	google.golang.org/protobuf v1.25.0
 )

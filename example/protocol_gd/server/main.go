@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/Allenxuxu/gev/example/protocol_gd/common"
+	"gitlab.yewifi.com/golden-cloud/common/gclog"
 	"google.golang.org/protobuf/proto"
 	"log"
 	"strconv"
@@ -24,12 +25,27 @@ func (s *example) OnMessage(c *gev.Connection, ctx interface{}, data []byte) (ou
 		log.Panic(" proto.Unmarshal err:", err)
 		return
 	}
-	log.Println("msgReq:", msgReq)
 	log.Println("msgReq.Cmd:", msgReq.Cmd)
 
+	log.Println("msgReq:", msgReq)
+	gclog.Info("gclog.Info msgReq:", msgReq)
+
+	log.Println("msgReq.Body:", msgReq.Body)
+	log.Println("msgReq.Body string:", string(msgReq.Body))
+	gclog.Info("gclog.Info msgReq.Body:", msgReq.Body)
+
+	gclog.WithField("msgReq.Body", msgReq.Body).WithField("msgReq.Body string", string(msgReq.Body)).Info("gclog.Info msgReq.Body info")
+
+	var respCmd common.CMD
 	switch msgReq.Cmd {
 	case common.CMD_CMD_HEART_BEAT_REQ:
 		log.Println("- msgReq.Cmd@CMD_CMD_HEART_BEAT")
+		respCmd = common.CMD_CMD_HEART_BEAT_RSP
+
+	case common.CMD_CMD_UPLOAD_LOGIN_REQ:
+		log.Println("- msgReq.Cmd@CMD_CMD_UPLOAD_LOGIN_REQ")
+		respCmd = common.CMD_CMD_UPLOAD_LOGIN_RSP
+
 	case common.CMD_CMD_UPLOAD_COOKIE_REQ:
 		log.Println("- msgReq.Cmd@CMD_CMD_UPLOAD_COOKIE")
 		body := common.UploadCookie{}
@@ -39,13 +55,19 @@ func (s *example) OnMessage(c *gev.Connection, ctx interface{}, data []byte) (ou
 			return
 		}
 		log.Println("body:", body)
+		gclog.Info("gclog.Info body:", body)
+		respCmd = common.CMD_CMD_UPLOAD_COOKIE_RSP
+
 	default:
 		log.Println("- msgReq.Cmd@default")
 	}
 
 	// 响应；注释则不响应
-	//out = data
-	//out = []byte("aaaaa123")
+	msg := msgReq
+	msg.Cmd = respCmd
+
+	log.Println("msg:", msg)
+	gclog.Info("gclog.Info msg:", msg)
 
 	return
 }
@@ -54,12 +76,21 @@ func (s *example) OnClose(c *gev.Connection) {
 	log.Println("OnClose")
 }
 
+func init() {
+	logger := gclog.Default(
+		"tools_test",
+		".",
+		5,
+		"",
+	)
+	gclog.SetDefaultLogger(logger)
+}
 func main() {
 	handler := new(example)
 	var port int
 	var loops int
 
-	flag.IntVar(&port, "port", 1834, "server port")
+	flag.IntVar(&port, "port", 18000, "server port")
 	flag.IntVar(&loops, "loops", -1, "num loops")
 	flag.Parse()
 

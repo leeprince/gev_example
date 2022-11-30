@@ -1,0 +1,6 @@
+# **/*.sum
+**/*.exe
+**/*.log
+**/*.vscode
+# **/*.mod
+.idea
