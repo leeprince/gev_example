@@ -11,6 +11,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -20,9 +21,9 @@ func Packet(data []byte) []byte {
 	binary.BigEndian.PutUint32(buffer, uint32(len(data)))
 
 	log.Println("Packet len(data):", len(data))
-	log.Println("Packet buffer(copy data before):", buffer)
+	//log.Println("Packet buffer(copy data before):", buffer)
 	copy(buffer[4:], data)
-	log.Println("Packet buffer:", buffer)
+	//log.Println("Packet buffer:", buffer)
 
 	return buffer
 }
@@ -80,7 +81,8 @@ func main() {
 		fmt.Printf("其他:重新输入\n")
 		fmt.Printf("请输入命令:")
 		cmd, _ := reader.ReadString('\n')
-		fmt.Printf("输入的 cmd: %s; T:%T \n", cmd, cmd)
+		cmdInt, _ := strconv.Atoi(cmd)
+		fmt.Printf("输入的 cmd: %s; T:%T; cmdName: %s \n", cmd, cmd, common.CMD_name[int32(common.CMD(cmdInt))])
 		// 去除右边的换行符
 		cmd = strings.TrimRight(cmd, "\n")
 		fmt.Printf("输入的 cmd 并去除右边的换行符后的 cmd: %s; T:%T \n", cmd, cmd)
@@ -199,7 +201,7 @@ func main() {
 		// --- 发送数据 -end ++++++++++++++++++++++++++++++++++
 
 		// --- 监听TCP服务端响应
-		go receveMessage(conn)
+		receveMessage(conn)
 	}
 }
 
