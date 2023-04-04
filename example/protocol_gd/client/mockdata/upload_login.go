@@ -1,4 +1,4 @@
-package main
+package mockdata
 
 import (
 	"github.com/Allenxuxu/gev/example/protocol_gd/common"
@@ -12,7 +12,7 @@ import (
  * @Desc:
  */
 
-func uploadCookie() common.SendMsg {
+func UploadCookie() common.SendMsg {
 	sendMsgBody := common.UploadCookie{
 		BusinessId:       10107,
 		OpenEnterpriseId: openEnterpriseId,

@@ -19,8 +19,8 @@ func (s *example) OnConnect(c *gev.Connection) {
 func (s *example) OnMessage(c *gev.Connection, ctx interface{}, data []byte) (out interface{}) {
 	log.Println("OnMessage：", data)
 
-	msgReq := common.SendMsg{}
-	err := proto.Unmarshal(data, &msgReq)
+	msgReq := &common.SendMsg{}
+	err := proto.Unmarshal(data, msgReq)
 	if err != nil {
 		log.Panic(" proto.Unmarshal err:", err)
 		return
@@ -54,8 +54,8 @@ func (s *example) OnMessage(c *gev.Connection, ctx interface{}, data []byte) (ou
 			log.Panic(" proto.Unmarshal(msgReq.Body, &body) err:", err)
 			return
 		}
-		log.Println("body:", body)
-		gclog.Info("gclog.Info body:", body)
+		log.Println("body:", &body)
+		gclog.Info("gclog.Info body:", &body)
 		respCmd = common.CMD_CMD_UPLOAD_COOKIE_RSP
 
 	default:
@@ -65,9 +65,12 @@ func (s *example) OnMessage(c *gev.Connection, ctx interface{}, data []byte) (ou
 	// 响应；注释则不响应
 	msg := msgReq
 	msg.Cmd = respCmd
-
 	log.Println("msg:", msg)
 	gclog.Info("gclog.Info msg:", msg)
+	out, err = proto.Marshal(msg)
+	if err != nil {
+		log.Panic(" proto.Marshal(msg) err:", err)
+	}
 
 	return
 }
@@ -103,6 +106,6 @@ func main() {
 		panic(err)
 	}
 
-	log.Println("server start")
+	log.Println("server start, port:", port)
 	s.Start()
 }

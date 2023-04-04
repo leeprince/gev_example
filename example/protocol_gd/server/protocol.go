@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"errors"
 	"log"
 
 	"github.com/Allenxuxu/gev"
@@ -14,6 +15,11 @@ const exampleHeaderLen = 4
 type ExampleProtocol struct{}
 
 func (d *ExampleProtocol) UnPacket(c *gev.Connection, buffer *ringbuffer.RingBuffer) (interface{}, []byte) {
+	if buffer.VirtualLength() > 65535 {
+		buffer.RetrieveAll()
+		return errors.New("invalid package"), nil
+	}
+
 	if buffer.VirtualLength() > exampleHeaderLen {
 		buf := pbytes.GetLen(exampleHeaderLen)
 		log.Println("*ExampleProtocol.UnPacket:buf:", buf)
@@ -38,10 +44,11 @@ func (d *ExampleProtocol) UnPacket(c *gev.Connection, buffer *ringbuffer.RingBuf
 }
 
 func (d *ExampleProtocol) Packet(c *gev.Connection, data interface{}) []byte {
-	dd := data.([]byte)
-	dataLen := len(dd)
+	dataBytes := data.([]byte)
+	dataLen := len(dataBytes)
 	ret := make([]byte, exampleHeaderLen+dataLen)
 	binary.BigEndian.PutUint32(ret, uint32(dataLen))
-	copy(ret[4:], dd)
+	copy(ret[4:], dataBytes)
+
 	return ret
 }

@@ -1,4 +1,4 @@
-package main
+package mockdata
 
 import (
 	"github.com/Allenxuxu/gev/example/protocol_gd/common"
@@ -12,7 +12,7 @@ import (
  * @Desc:
  */
 
-func uploadLogin() common.SendMsg {
+func UploadLogin() common.SendMsg {
 	sendMsgBody := common.UploadLogin{
 		BusinessId:       10107,
 		OpenEnterpriseId: openEnterpriseId,

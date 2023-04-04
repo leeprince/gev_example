@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"fmt"
+	"github.com/Allenxuxu/gev/example/protocol_gd/client/mockdata"
 	"github.com/Allenxuxu/gev/example/protocol_gd/common"
 	"gitlab.yewifi.com/golden-cloud/common/gclog"
 	"google.golang.org/protobuf/proto"
@@ -47,14 +48,6 @@ func UnPacket(c net.Conn) ([]byte, error) {
 	return contentByte, nil
 }
 
-// 配置信息
-var (
-	token            = "v5_FlfITAGQlOeINlVK1euASi7e6eHmFP5U1154764563"
-	openEnterpriseId = "YpQHNOTfZ0KWvZZno1A2BOvojyShiQ3+7um3VkAxYUA="
-)
-
-// 配置信息 -end
-
 func init() {
 	logger := gclog.Default(
 		"tools_test",
@@ -67,9 +60,9 @@ func init() {
 func main() {
 	//conn, e := net.Dial("tcp", "10.20.16.49:30106") // gd 开发环境
 	//conn, e := net.Dial("tcp", "10.20.16.49:30107") // gd 测试环境
-	conn, e := net.Dial("tcp", "127.0.0.1:18000") // gd 本地
 
-	//conn, e := net.Dial("tcp", "127.0.0.1:1834") // gev 本地
+	conn, e := net.Dial("tcp", "127.0.0.1:18000") // docker容器内部IP:端口
+	//conn, e := net.Dial("tcp", "10.98.10.61:18000") // 本地宿主机IP:端口
 
 	if e != nil {
 		log.Fatal(e)
@@ -77,10 +70,71 @@ func main() {
 	defer conn.Close()
 
 	for {
+		// --- 向TCP服务端发送请求
+		sendMessage(conn)
 
 		// --- 监听TCP服务端响应
 		receveMessage(conn)
 	}
+}
+
+func sendMessage(conn net.Conn) {
+	// --- 模拟TCP客户端发送的数据 -------------------------
+	log.Println("准备数据>选择发送消息的命令(可能被打印出的消息覆盖命令列表)...")
+
+	// 发送的数据：读取标准输入
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("\n\n===============选择发送消息的命令============\n")
+	fmt.Printf("0:心跳\n")
+	fmt.Printf("1:上报cookie\n")
+	fmt.Printf("2:上报税号登录态(客户端掉线重连)\n")
+	fmt.Printf("3:响应代理请求\n")
+	fmt.Printf("其他:重新输入\n")
+	fmt.Printf("请输入命令:")
+
+	cmd, _ := reader.ReadString('\n')
+	cmdInt, _ := strconv.Atoi(cmd)
+	fmt.Printf("输入的 cmd:%s; T:%T; cmdName:%s \n", cmd, cmd, common.CMD_name[int32(common.CMD(cmdInt))])
+	// 去除右边的换行符
+	cmd = strings.TrimRight(cmd, "\n")
+	fmt.Printf("输入的 cmd 并去除右边的换行符后的 cmd:%s; T:%T \n", cmd, cmd)
+
+	var sendMsg common.SendMsg
+	switch cmd {
+	case "0":
+		//心跳
+		sendMsg = mockdata.Pong()
+	case "1":
+		// 上报cookies
+		sendMsg = mockdata.UploadCookie()
+	case "2":
+		// 上报税号登录态
+		sendMsg = mockdata.UploadLogin()
+	case "3":
+		// 响应代理请求
+		sendMsg = mockdata.SendProxyResponse()
+	default:
+		log.Println("不支持该指令", cmd, &sendMsg)
+		return
+	}
+	log.Println("sendMsg", &sendMsg)
+
+	sendMsgByte, err := proto.Marshal(&sendMsg)
+	if err != nil {
+		log.Panic("proto.Marshal err", err)
+	}
+	buffer := Packet(sendMsgByte)
+	log.Println("数据打包结束")
+	// --- 模拟TCP客户端发送的数据 -end
+
+	// --- 发送数据
+	log.Println("发送数据...")
+	_, err = conn.Write(buffer)
+	if err != nil {
+		log.Panic("conn.Write err", err)
+	}
+	log.Println("发送数据结束")
+	// --- 发送数据 -end
 }
 
 func receveMessage(conn net.Conn) {
@@ -102,6 +156,8 @@ func receveMessage(conn net.Conn) {
 	switch msgReq.Cmd {
 	case common.CMD_CMD_NONE:
 		log.Println("- switch CMD_CMD_NONE")
+	case common.CMD_CMD_UPLOAD_LOGIN_RSP:
+		log.Println("- switch CMD_CMD_UPLOAD_LOGIN_RSP")
 	case common.CMD_CMD_HEART_BEAT_RSP:
 		log.Println("- switch CMD_CMD_HEART_BEAT_RSP")
 	case common.CMD_CMD_OPEN_URL_REQ:
@@ -112,7 +168,7 @@ func receveMessage(conn net.Conn) {
 			log.Panic(" proto.Unmarshal(msgReq.Body, &body) err:", err)
 			return
 		}
-		log.Println("body:", body)
+		log.Println("body:", &body)
 		log.Println("body.Url:", body.Url)
 	case common.CMD_CMD_PROXY_RSP:
 		log.Println("- switch CMD_CMD_PROXY_RSP")
@@ -124,62 +180,4 @@ func receveMessage(conn net.Conn) {
 	//log.Println("time.sleep...")
 	//time.Sleep(time.Second * 1)
 	// --- 监听TCP服务端响应 -end =============================
-}
-
-func sendMessage(conn net.Conn) {
-	// --- 模拟TCP客户端发送的数据 -------------------------
-	log.Println("准备数据>选择发送消息的命令(可能被打印出的消息覆盖命令列表)...")
-
-	// 发送的数据：读取标准输入
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("\n\n===============选择发送消息的命令============\n")
-	fmt.Printf("0:心跳\n")
-	fmt.Printf("1:上报cookie\n")
-	fmt.Printf("2:上报税号登录态(客户端掉线重连)\n")
-	fmt.Printf("3:响应代理请求\n")
-	fmt.Printf("其他:重新输入\n")
-	fmt.Printf("请输入命令:")
-
-	cmd, _ := reader.ReadString('\n')
-	cmdInt, _ := strconv.Atoi(cmd)
-	fmt.Printf("输入的 cmd: %s; T:%T; cmdName: %s \n", cmd, cmd, common.CMD_name[int32(common.CMD(cmdInt))])
-	// 去除右边的换行符
-	cmd = strings.TrimRight(cmd, "\n")
-	fmt.Printf("输入的 cmd 并去除右边的换行符后的 cmd: %s; T:%T \n", cmd, cmd)
-
-	var sendMsg common.SendMsg
-	switch cmd {
-	case "0":
-		//心跳
-		sendMsg = pong()
-	case "1":
-		// 上报cookies
-		sendMsg = uploadCookie()
-	case "2":
-		// 上报税号登录态
-		sendMsg = uploadLogin()
-	case "3":
-		// 响应代理请求
-		sendMsg = sendProxyResponse()
-	default:
-		log.Println("不支持该指令")
-		return
-	}
-
-	sendMsgByte, err := proto.Marshal(&sendMsg)
-	if err != nil {
-		log.Panic("proto.Marshal err", err)
-	}
-	buffer := Packet(sendMsgByte)
-	log.Println("数据打包结束")
-	// --- 模拟TCP客户端发送的数据 -end
-
-	// --- 发送数据
-	log.Println("发送数据...")
-	_, err = conn.Write(buffer)
-	if err != nil {
-		log.Panic("conn.Write err", err)
-	}
-	log.Println("发送数据结束")
-	// --- 发送数据 -end
 }

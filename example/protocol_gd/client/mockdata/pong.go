@@ -1,4 +1,4 @@
-package main
+package mockdata
 
 import "github.com/Allenxuxu/gev/example/protocol_gd/common"
 
@@ -8,7 +8,7 @@ import "github.com/Allenxuxu/gev/example/protocol_gd/common"
  * @Desc:
  */
 
-func pong() common.SendMsg {
+func Pong() common.SendMsg {
 	return common.SendMsg{
 		Cmd:   common.CMD_CMD_HEART_BEAT_REQ,
 		Token: token,
